@@ -32,43 +32,24 @@ export function addNote(req, res) {
   });
 }
 
-/*export function deleteNote(req, res){
-
-const noteId = req.params.noteId;
-
-
-  Note.findOne({ id: noteId }).exec((err, note) => {
-   if (err) {
-     res.status(500).send(err);
-   }
-
-    Note.findOne({id: noteId}, (err, lane) => {
-        note.remove(() => {
-          Lane.findOne({id: req.body.laneId}).exec((err, lane) => {
-            const updateNotes = lane.notes.filter(note => note.id !== noteId);
-            lane.notes = updateNotes;
-            lane.save();
-            res.json(note);
-          });
-        });
-    });
-  });
-}*/
+// remove note from lane and notes collection
 
 export function deleteNote(req, res) {
-  const noteId = req.params.noteId
+  const noteId = req.params.noteId;
   Note.findOne({ id: noteId }).exec((err, note) => {
     if (err) {
       res.status(500).send(err);
+      return;
     }
 
-    note.remove(() => {
-      Lane.findOne({id: req.body.laneId}).exec((err, lane) => {
-        const updatedNotes = lane.notes.filter(note => note.id !== noteId);
+    Lane.findOne({id: req.body.laneId}).exec((err, lane) => {
+      const updatedNotes = lane.notes.filter(note => note.id !== noteId);
         lane.notes = updatedNotes;
-        lane.save();
-        res.json(note);
+        lane.save(()=> {
+          note.remove(() => {
+            res.status(200).end();
+          });
+        });
       });
     });
-  });
 }
