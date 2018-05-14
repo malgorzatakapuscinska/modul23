@@ -39,7 +39,6 @@ export function deleteNote(req, res) {
   Note.findOne({ id: noteId }).exec((err, note) => {
     if (err) {
       res.status(500).send(err);
-      return;
     }
 
     Lane.findOne({id: req.body.laneId}).exec((err, lane) => {
@@ -52,4 +51,22 @@ export function deleteNote(req, res) {
         });
       });
     });
+}
+
+export function editNote (req, res){
+  const noteId = req.params.noteId;
+  const newTask = req.body.task;
+  Note.findOne({id: noteId}).exec((err, note) => {
+    if (err) {
+      res.status(500).send(err);
+    }
+    note.task = newTask;
+    note.save((err, noteSaved) => {
+      if (err) {
+        res.status(500).end();
+      }
+
+      res.json(noteSaved);
+    })
+  });
 }
