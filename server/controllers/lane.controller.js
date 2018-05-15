@@ -1,4 +1,5 @@
 import Lane from '../models/lane';
+import Note from '../models/note';
 import uuid from 'uuid';
 
 //addLane function - creates an instance of Lane,
@@ -33,12 +34,21 @@ export function getLanes(req, res) {
 }
 
 export function deleteLane(req, res) {
-  Lane.findOne({ id: req.params.laneId  }).exec((err, lane) => {
+  Lane.findOne({ id: req.params.laneId }).exec((err, lane) => {
     if(err){
       res.status(500).send(err);
-      return;
     }
-    lane.remove(() => {res.status(200).end();
-    });
+
+    const notes = lane.notes;
+    const notesIds = notes.map(note => note.id);
+    Note.remove({id: {$in: notesIds}}).exec(err => {
+      lane.remove(() => {
+        res.status(200).end();
+        });
+      });
   });
 }
+
+/* export function editName(req, res) {
+  Lane.findOne({id: req.params.laneId })
+}*/
